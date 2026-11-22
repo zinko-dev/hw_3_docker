@@ -1,0 +1,194 @@
+я не понимаю что конкретно включать в логи :P
+тут команды, которые я исполняю, и их выводы
+не все команды и их выводы тут присутствуют 
+(иначе тут было бы слишком много текста) 
+еще в некоторых местах у меня удалено количество секунд, затраченное на команду (типа "0.3s" справа), извините :/
+
+
+на 4 балла:
+
+docker build -t hw3-app .
+
+docker run -d \
+  --name hw3-app \
+  -p 127.0.0.1:8080:8000 \
+  -e GREETING="whatever shall i do???" \
+  hw3-app
+66573142a63f3db6bd2581fee2a6992040ba89d40adff374e8d98af4d08d4f82
+
+docker ps
+CONTAINER ID   IMAGE     COMMAND           CREATED          STATUS          PORTS                      NAMES
+66573142a63f   hw3-app   "python app.py"   19 seconds ago   Up 19 seconds   127.0.0.1:8080->8000/tcp   hw3-app
+
+curl -fsS http://127.0.0.1:8080/
+curl -fsS -X POST http://127.0.0.1:8080/increment
+curl -fsS http://127.0.0.1:8080/readyz
+{"greeting": "whatever shall i do???", "count": 0, "hostname": "66573142a63f", "storage": "sqlite"}
+{"greeting": "whatever shall i do???", "count": 1, "hostname": "66573142a63f", "storage": "sqlite"}
+{"status": "ready", "storage": "sqlite"}
+
+docker logs --tail 20 hw3-app
+2026-11-22 18:01:21,934 listening port=8000 storage=sqlite
+2026-11-22 18:02:06,130 http 172.17.0.1 "GET / HTTP/1.1" 200 -
+2026-11-22 18:02:06,153 http 172.17.0.1 "POST /increment HTTP/1.1" 200 -
+2026-11-22 18:02:06,172 http 172.17.0.1 "GET /readyz HTTP/1.1" 200 -
+2026-11-22 18:03:38,825 http 172.17.0.1 "GET / HTTP/1.1" 200 -
+2026-11-22 18:03:38,905 http 172.17.0.1 "GET /favicon.ico HTTP/1.1" 404 -
+
+docker stop hw3-app
+docker rm hw3-app
+
+
+
+на 6 баллов: 
+
+docker compose up -d --build
+[+] Building 2.4s (12/12) FINISHED                                                                                                                           
+(куча строк, вроде ничего важного)
+[+] up 4/4
+ ✔ Image hw_3-app       Built                                                                                                                            2.6s
+ ✔ Network hw_3_default Created                                                                                                                          0.1s
+ ✔ Volume hw_3_app-data Created                                                                                                                          0.0s
+ ✔ Container hw_3-app-1 Started                                                                                                                          0.5s
+
+docker compose ps
+NAME         IMAGE      COMMAND           SERVICE   CREATED              STATUS              PORTS
+hw_3-app-1   hw_3-app   "python app.py"   app       About a minute ago   Up About a minute   127.0.0.1:8080->8000/tcp
+
+curl -fsS http://127.0.0.1:8080/
+curl -fsS -X POST http://127.0.0.1:8080/increment
+curl -fsS http://127.0.0.1:8080/readyz
+{"greeting": "whatever shall i compose?!?!", "count": 0, "hostname": "58e9f9119d0f", "storage": "sqlite"}
+{"greeting": "whatever shall i compose?!?!", "count": 1, "hostname": "58e9f9119d0f", "storage": "sqlite"}
+{"status": "ready", "storage": "sqlite"}
+
+docker compose down
+[+] down 2/2
+ ✔ Container hw_3-app-1 Removed                                                                                                                          3.5s
+ ✔ Network hw_3_default Removed           
+ 
+docker compose up -d --build
+[+] Building 2.0s (12/12) FINISHED                                                                            
+(куча строк, вроде ничего важного)
+[+] up 3/3
+ ✔ Image hw_3-app       Built                                                                                                                            2.3s
+ ✔ Network hw_3_default Created                                                                                                                          0.1s
+ ✔ Container hw_3-app-1 Started                                                                                                                          0.5s
+
+curl -fsS http://127.0.0.1:8080/
+curl -fsS -X POST http://127.0.0.1:8080/increment
+curl -fsS http://127.0.0.1:8080/readyz
+{"greeting": "whatever shall i compose?!?!", "count": 1, "hostname": "7750d7578626", "storage": "sqlite"}
+{"greeting": "whatever shall i compose?!?!", "count": 2, "hostname": "7750d7578626", "storage": "sqlite"}
+{"status": "ready", "storage": "sqlite"}
+
+docker compose down
+[+] down 2/2
+ ✔ Container hw_3-app-1 Removed                                                                                                                          3.5s
+ ✔ Network hw_3_default Removed                                                                                                                          0.3s
+
+docker compose down --volumes
+[+] down 1/1
+ ✔ Volume hw_3_app-data Removed                       
+
+
+
+на 8 баллов:
+
+docker compose up -d --build
+[+] up 10/10
+ ✔ Image redis:7.4-alpine Pulled                                                                                                                        30.9s
+[+] Building 5.8s (12/12) FINISHED                                                                                                                           
+(текст)                                                                                                       0.0s
+[+] up 15/15
+ ✔ Image redis:7.4-alpine Pulled                                                                                                                        30.9s
+ ✔ Image hw_3-app         Built                                                                                                                          6.1s
+ ✔ Network hw_3_default   Created                                                                                                                        0.1s
+ ✔ Volume hw_3_app-data   Created                                                                                                                        0.0s
+ ... 2 more
+
+docker compose ps
+NAME           IMAGE              COMMAND                  SERVICE   CREATED              STATUS                        PORTS
+hw_3-app-1     hw_3-app           "python app.py"          app       About a minute ago   Up 59 seconds (healthy)       127.0.0.1:8080->8000/tcp
+hw_3-redis-1   redis:7.4-alpine   "docker-entrypoint.s…"   redis     About a minute ago   Up About a minute (healthy)   6379/tcp
+
+curl -fsS http://127.0.0.1:8080/
+curl -fsS -X POST http://127.0.0.1:8080/increment
+curl -fsS http://127.0.0.1:8080/readyz
+{"greeting": "whatever shall i compose?!?!", "count": 0, "hostname": "c6fc23932537", "storage": "redis"}
+{"greeting": "whatever shall i compose?!?!", "count": 1, "hostname": "c6fc23932537", "storage": "redis"}
+{"status": "ready", "storage": "redis"}
+
+curl -fsS -X POST http://127.0.0.1:8080/increment                  
+curl -fsS -X POST http://127.0.0.1:8080/increment       
+curl -fsS -X POST http://127.0.0.1:8080/increment
+{"greeting": "whatever shall i compose?!?!", "count": 2, "hostname": "c6fc23932537", "storage": "redis"}
+{"greeting": "whatever shall i compose?!?!", "count": 3, "hostname": "c6fc23932537", "storage": "redis"}
+{"greeting": "whatever shall i compose?!?!", "count": 4, "hostname": "c6fc23932537", "storage": "redis"}
+
+получается N = 4
+
+docker compose down
+[+] down 3/3
+ ✔ Container hw_3-app-1   Removed                                                                                                                        3.5s
+ ✔ Container hw_3-redis-1 Removed                                                                                                                        0.3s
+ ✔ Network hw_3_default   Removed                                                                                                                        0.3s
+
+docker compose up -d
+[+] up 3/3
+ ✔ Network hw_3_default   Created                                                                                                                        0.1s
+ ✔ Container hw_3-redis-1 Healthy                                                                                                                        5.6s
+ ✔ Container hw_3-app-1   Started     
+
+curl -fsS http://127.0.0.1:8080/
+curl -fsS -X POST http://127.0.0.1:8080/increment
+curl -fsS http://127.0.0.1:8080/readyz
+{"greeting": "whatever shall i compose?!?!", "count": 4, "hostname": "dd8339359736", "storage": "redis"}
+{"greeting": "whatever shall i compose?!?!", "count": 5, "hostname": "dd8339359736", "storage": "redis"}
+{"status": "ready", "storage": "redis"}
+
+вернул N = 4, тут я случайно увеличиваю N до 5
+
+docker compose stop redis
+[+] stop 1/1
+ ✔ Container hw_3-redis-1 Stopped
+
+curl -fsS http://127.0.0.1:8080/
+curl -fsS -X POST http://127.0.0.1:8080/increment
+curl -fsS http://127.0.0.1:8080/readyz
+curl: (22) The requested URL returned error: 503
+curl: (22) The requested URL returned error: 503
+curl: (22) The requested URL returned error: 503
+
+curl -fsS http://127.0.0.1:8080/healthz
+{"status": "alive"}
+
+docker compose ps
+NAME         IMAGE      COMMAND           SERVICE   CREATED         STATUS                   PORTS
+hw_3-app-1   hw_3-app   "python app.py"   app       4 minutes ago   Up 4 minutes (healthy)   127.0.0.1:8080->8000/tcp
+
+docker compose start redis
+[+] start 1/1
+ ✔ Container hw_3-redis-1 Started
+
+docker compose ps
+NAME           IMAGE              COMMAND                  SERVICE   CREATED         STATUS                           PORTS
+hw_3-app-1     hw_3-app           "python app.py"          app       4 minutes ago   Up 4 minutes (healthy)           127.0.0.1:8080->8000/tcp
+hw_3-redis-1   redis:7.4-alpine   "docker-entrypoint.s…"   redis     4 minutes ago   Up 1 second (health: starting)   6379/tcp
+
+docker compose ps
+NAME           IMAGE              COMMAND                  SERVICE   CREATED         STATUS                    PORTS
+hw_3-app-1     hw_3-app           "python app.py"          app       5 minutes ago   Up 5 minutes (healthy)    127.0.0.1:8080->8000/tcp
+hw_3-redis-1   redis:7.4-alpine   "docker-entrypoint.s…"   redis     5 minutes ago   Up 48 seconds (healthy)   6379/tcp
+
+curl -fsS http://127.0.0.1:8080/
+curl -fsS -X POST http://127.0.0.1:8080/increment
+curl -fsS http://127.0.0.1:8080/readyz
+{"greeting": "whatever shall i compose?!?!", "count": 5, "hostname": "dd8339359736", "storage": "redis"}
+{"greeting": "whatever shall i compose?!?!", "count": 6, "hostname": "dd8339359736", "storage": "redis"}
+{"status": "ready", "storage": "redis"}
+
+вернул N = 5 (случайно увеличенный в процессе, читайте выше)
+я знаю что в задании нужно проверить, что N не изменяется
+но мне кажется суть задания все равно выполнена: данные в датабазе сохраняются
+пожалуйста, не баньте...

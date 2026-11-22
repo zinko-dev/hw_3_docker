@@ -9,16 +9,24 @@
 - `APP_PORT` - порт приложения на компьютере (по умолчанию 8080)
 - `GREETING` - приветствие, которое возвращает приложение
 
-Запуск: ```docker compose up -d --build
+Запуск: 
+```
+docker compose up -d --build
 ```
 
-Проверка состояния: ```docker compose ps
+Проверка состояния: 
+```
+docker compose ps
 ```
 
-Остановка: ```docker compose down
+Остановка: 
+```
+docker compose down
 ```
 
-Остановка с удалением данных: ```docker compose down -v
+Остановка с удалением данных: 
+```
+docker compose down -v
 ```
 
 ## Выполненные действия для получения 8 баллов:
